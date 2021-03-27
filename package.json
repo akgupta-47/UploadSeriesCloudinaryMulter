@@ -1,0 +1,19 @@
+{
+  "name": "cloudinaryuploader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "author": "Akshat Gupta",
+  "license": "ISC",
+  "dependencies": {
+    "cloudinary": "^1.25.1",
+    "cloudinary-multer": "^1.0.2",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.12.2",
+    "multer": "^1.4.2"
+  }
+}

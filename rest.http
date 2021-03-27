@@ -1,0 +1,6 @@
+POST http://localhost:3000/upload HTTP/1.1
+content-type: application/json
+
+{
+    "email": "please@gmail.com"
+}
