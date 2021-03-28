@@ -29,9 +29,11 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+let newFileName;
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
+        public_id: (req, file) => `${file.originalname.split('.')[0]}-${Date.now()}`
         // folder: "photos",
         // allowedFormats: ['jpg', 'jpeg', 'png'],
         // transformation: [{ width: 960, height: 960, crop: "limit" }],
@@ -48,12 +50,11 @@ try{
     
     upload = multer({
     storage,
-    /*
     limits: {fileSize: 1000000},
     fileFilter: (req,file,cb) => {
         checkFileType(req, file, cb);
     } 
-    */
+
 }).single("image");
 }catch(error){
     console.log(error);
@@ -68,7 +69,8 @@ const checkFileType = (req, file, cb) => {
     // check mimetypes
     const mimetype = fileTypes.test(file.mimetype);
 
-    req.file.filename = `${req.file.fieldname}-${Date.now()}${path.extname(req.file.originalname)}`;
+    // file.originalname = `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`;
+    // console.log(file);
 
     if(mimetype && extname) {
         return cb(null, true);
@@ -80,19 +82,28 @@ const checkFileType = (req, file, cb) => {
 // Init app variable
 const app = express();
 
-// EJS
-app.set('view engine', 'ejs');
-//Public folder
-app.use(express.static('./public'));
+// // EJS
+// app.set('view engine', 'ejs');
+// //Public folder
+// app.use(express.static('./public'));
 
 app.post('/upload',upload, async (req, res) => {
     try{
-        var files=req.files;
-        if(files){
-            cloudinary.uploader.upload(file.path, function(result) { 
-            console.log(result);
-            });
-        }
+        // res.json({
+        //     file: req.file,
+        //     body: req.body,
+        // });
+        const doc = await Basic.create({
+            menu: req.file.path,
+            name: req.body.name,
+        });
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+              data: doc,
+            },
+          });
     }catch(error){
         console.log(error);
     }

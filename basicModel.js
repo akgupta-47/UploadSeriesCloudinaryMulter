@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const basicSchema = mongoose.Schema({
     name: String,
-    file: String,
+    menu: String,
 });
 
 const Basic = mongoose.model('Basic', basicSchema);
