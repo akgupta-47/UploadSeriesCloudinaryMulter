@@ -1,8 +1,10 @@
 const express = require('express');
 const multer = require('multer');
+const ejs = require('ejs');
 // const sharp = require('sharp');
 const cloudinary = require("cloudinary").v2;
-const cloudinaryStorage = require("cloudinary-multer");
+// const cloudinaryStorage = require("cloudinary-multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const path = require('path');
 const mongoose = require('mongoose');
 const Basic = require('./basicModel');
@@ -27,18 +29,35 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = cloudinaryStorage({
+const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-});
+    params: {
+        // folder: "photos",
+        // allowedFormats: ['jpg', 'jpeg', 'png'],
+        // transformation: [{ width: 960, height: 960, crop: "limit" }],
+        // filename: (req, file, callback) => {
+        // const name = `${req.file.fieldname}-${Date.now()}${path.extname(req.file.originalname)}`;
+        // callback(undefined, name);
+        // }
+    }
+});  
 
 // Init upload variable, .single- specify to allow only single image upload
-const upload = multer({
+let upload;
+try{
+    
+    upload = multer({
     storage,
+    /*
     limits: {fileSize: 1000000},
     fileFilter: (req,file,cb) => {
         checkFileType(req, file, cb);
     } 
-}).single();
+    */
+}).single("image");
+}catch(error){
+    console.log(error);
+}
 
 // check file type
 const checkFileType = (req, file, cb) => {
@@ -49,7 +68,7 @@ const checkFileType = (req, file, cb) => {
     // check mimetypes
     const mimetype = fileTypes.test(file.mimetype);
 
-    file.filename = `${req.file.fieldname}-${Date.now()}${path.extname(req.file.originalname)}`;
+    req.file.filename = `${req.file.fieldname}-${Date.now()}${path.extname(req.file.originalname)}`;
 
     if(mimetype && extname) {
         return cb(null, true);
@@ -58,46 +77,22 @@ const checkFileType = (req, file, cb) => {
     }
 }
 
-/*
-// Resize image to particular needs
-const ImageResizer = async (req,res, next) => {
-    if (!req.file) return;
-    // console.log(typeof req.next);
-
-    req.file.filename = `${req.file.fieldname}-${Date.now()}${path.extname(req.file.originalname)}`;
-  
-    await sharp(req.file.buffer)
-      .resize(500, 500)
-      .toFile(`./public/uploads/${req.file.filename}`, 
-        (err) => {
-            if (err) {
-                res.render('index', {
-                    msg: err
-                })
-            }else{
-                // console.log(req.file);
-                // res.send('test');
-                if(req.file == undefined) {
-                    res.render('index', {
-                        msg: 'Error: File not submitted!!'
-                    });
-                }else{
-                    res.render('index', {
-                        msg: 'File Uploaded!!',
-                        file: `uploads/${req.file.filename}`
-                    })
-                }
-            }
-        });
-}
-*/
-
 // Init app variable
 const app = express();
 
+// EJS
+app.set('view engine', 'ejs');
+//Public folder
+app.use(express.static('./public'));
+
 app.post('/upload',upload, async (req, res) => {
     try{
-        const doc = await Basic.create(req.body);
+        var files=req.files;
+        if(files){
+            cloudinary.uploader.upload(file.path, function(result) { 
+            console.log(result);
+            });
+        }
     }catch(error){
         console.log(error);
     }
